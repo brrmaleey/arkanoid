@@ -179,5 +179,18 @@ class TestGameModel(unittest.TestCase):
             self.assertEqual(reloaded_model.best_score, 420)
 
 
+    def test_lower_score_does_not_overwrite_best_score(self):
+        """????? ????????? ???? ??????? ?? ?????????????? ??????????? ??????."""
+        with tempfile.TemporaryDirectory() as directory:
+            storage = ScoreStorage(Path(directory) / "best_score.json")
+            storage.save_best_score(420)
+
+            model = GameModel(480, 640, score_storage=storage)
+            model.add_score(100)
+
+            self.assertEqual(model.best_score, 420)
+            self.assertEqual(storage.load_best_score(), 420)
+
+
 if __name__ == "__main__":
     unittest.main()

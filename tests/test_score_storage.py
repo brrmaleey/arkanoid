@@ -41,5 +41,24 @@ class TestScoreStorage(unittest.TestCase):
                 storage.save_best_score(-1)
 
 
+    def test_missing_key_returns_zero(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "best_score.json"
+            path.write_text("{}", encoding="utf-8")
+            self.assertEqual(ScoreStorage(path).load_best_score(), 0)
+
+    def test_negative_score_in_file_returns_zero(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "best_score.json"
+            path.write_text('{"best_score": -50}', encoding="utf-8")
+            self.assertEqual(ScoreStorage(path).load_best_score(), 0)
+
+    def test_string_score_in_file_returns_zero(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "best_score.json"
+            path.write_text('{"best_score": "420"}', encoding="utf-8")
+            self.assertEqual(ScoreStorage(path).load_best_score(), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
