@@ -39,19 +39,19 @@ GAME_OVER = "game_over"
 WIN = "win"
 
 
+from src.models.score_storage import ScoreStorage
+
+
 class GameModel:
     """Всё состояние игры и правила, по которым оно меняется."""
 
-    def __init__(self, width, height, bonus_chance=BONUS_CHANCE):
-        """Создать игру на поле width x height.
-
-        bonus_chance можно поменять, например, в тестах: 0 — бонусов
-        не будет совсем, 1 — бонус выпадает из каждого кирпича.
-        """
+    def __init__(self, width, height, bonus_chance=BONUS_CHANCE,
+                 score_storage=None):
         self.width = width
         self.height = height
         self.bonus_chance = bonus_chance
-        self.best_score = 0
+        self.score_storage = score_storage or ScoreStorage()
+        self.best_score = self.score_storage.load_best_score()
         self.new_game()
 
     def new_game(self):
@@ -231,9 +231,11 @@ class GameModel:
         self.ball.y = self.paddle.top - self.ball.radius
 
     def add_score(self, points):
-        """Добавить очки и обновить рекорд."""
+        """???????? ???? ? ????????? ????? ??????."""
         self.score += points
-        self.best_score = max(self.best_score, self.score)
+        if self.score > self.best_score:
+            self.best_score = self.score
+            self.score_storage.save_best_score(self.best_score)
 
     def check_ball_lost(self):
         """Если мяч упал ниже поля, отнять жизнь."""

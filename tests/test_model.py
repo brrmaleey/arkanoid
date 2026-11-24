@@ -1,6 +1,9 @@
 """Тесты для игровых объектов и логики игры."""
 
 import unittest
+import tempfile
+from pathlib import Path
+from src.models.score_storage import ScoreStorage
 
 from src.models.game_model import (BALL_SPEED, FIELD_TOP, GAME_OVER,
                                    PADDLE_WIDTH, PAUSED, PLAYING, READY,
@@ -163,6 +166,17 @@ class TestGameModel(unittest.TestCase):
         model.move_bonuses()
         self.assertEqual(model.bonuses, [])
         self.assertEqual(model.lives, START_LIVES + 1)
+
+
+    def test_best_score_persists_across_models(self):
+        """?????? ??????????? ? ????????? ? ??????????? ????? ???????."""
+        with tempfile.TemporaryDirectory() as directory:
+            storage = ScoreStorage(Path(directory) / "best_score.json")
+            model = GameModel(480, 640, score_storage=storage)
+            model.add_score(420)
+
+            reloaded_model = GameModel(480, 640, score_storage=storage)
+            self.assertEqual(reloaded_model.best_score, 420)
 
 
 if __name__ == "__main__":
